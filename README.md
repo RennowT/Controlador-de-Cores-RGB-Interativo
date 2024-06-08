@@ -1,4 +1,5 @@
 # Controlador-de-Cores-RGB-Interativo
+O Controlador de Cores RGB Interativo é um projeto eletrizante que traz o poder da customização de cores para a palma da sua mão. Este sistema inovador utiliza um microcontrolador ATMega328, LEDs RGB, botões de seleção e um potenciômetro, proporcionando uma experiência de controle de iluminação intuitiva e versátil.
 
 ## Componentes
 1. LED RGB - 1
