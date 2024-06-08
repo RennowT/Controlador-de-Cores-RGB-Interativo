@@ -13,10 +13,12 @@
 #define POTENCIOMETER_PIN (1 << PC0)  // Definition of the pin referring to the ADC reading of the potentiometer
 #define BUZZER_PIN (1 << PB2)         // definition of the pin related to the buzzer
 
+/* Declaration of functions */
+void GPIO_init();
+
 unsigned int adc_result0;
 unsigned int adc_result1;
 unsigned int adc_result2;
-
 
 float tensao;
 
@@ -63,24 +65,34 @@ int ADC_read(uint8_t ch) {
 void setRGB(float r, float g, float b) {
   OCR0A = r / 4;  // Red
   OCR0B = g / 4;  // Green
-  OCR0C = b / 4;  // Blue
+  //OCR0C = b / 4;  // Blue
 }
 
 int main() {
+  GPIO_init(); // Starts the GPIO pins
 
-  ADC_init();  // Inicializa ADC     
+  //ADC_init();  // Inicializa ADC     
 
-  DDRD |= pwmOut;
-  PORTD &= ~pwmOut;
+  //TCCR0A |= (1 << WGM01) | (1 << WGM00) | (1 << COM0A1);
+  //TCCR0B |= (1 << CS00);
+  //OCR0A = 0;
 
-  DDRD |= RedPin | GreenPin | BluePin;  // Configurando os pinos do LED RGB como saída
-
-  TCCR0A |= (1 << WGM01) | (1 << WGM00) | (1 << COM0A1);
-  TCCR0B |= (1 << CS00);
-  OCR0A = 0;
+  
 
   while (1) {
     
   }
   return 0;
+}
+
+void GPIO_init() {
+  // Declaring pins as output
+  DDRB |= BLUE_COLOR_PIN | BUZZER_PIN;
+  DDRD |= RED_COLOR_PIN | GREEN_COLOR_PIN;
+
+  // Declaring pins as input
+  DDRD &= ~(ON_OFFF_BUTTON_PIN | SAVE_BUTTON_PIN | RIGHT_BUTTON_PIN | LEFT_BUTTON_PIN);
+
+  // Put the button pins in pull-up
+  PORTD |= ON_OFFF_BUTTON_PIN | SAVE_BUTTON_PIN | RIGHT_BUTTON_PIN | LEFT_BUTTON_PIN;
 }
