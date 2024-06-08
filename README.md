@@ -5,7 +5,7 @@ O Controlador de Cores RGB Interativo é um projeto eletrizante que traz o poder
 1. LED RGB - 1
 2. Botões - 4
 3. Potenciometro - 1
-4. Display LCD - 1
+4. Buzzer - 1
 
 ## Periféricos
 1. GPIO
@@ -15,6 +15,7 @@ O Controlador de Cores RGB Interativo é um projeto eletrizante que traz o poder
 5. EEPROM
 
 ## Pinagem
+- PB2 - GPIO para controle do buzzer
 - PB3 - PWM com azul do LED
 - PC0 - ADC para mudança de intensidade das cores
 - PD2 - INT0 para o botão de desligar/ligar
