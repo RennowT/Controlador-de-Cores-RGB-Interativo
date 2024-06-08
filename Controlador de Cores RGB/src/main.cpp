@@ -9,13 +9,14 @@
 #define ON_OFFF_BUTTON_PIN (1 << PD2) // Definition of the pin for the on and off button
 #define SAVE_BUTTON_PIN (1 << PD3)    // Definition of the pin for the color saving button
 #define RIGHT_BUTTON_PIN (1 << PD4)   // Definition of the pin for the color change button to the right
-#define LEFT_BUTTON_PIN (1 << PD7)    // Definition of the pin for the color change button to the left
+#define LEFT_BUTTON_PIN (1 << PB0)    // Definition of the pin for the color change button to the left
 #define POTENCIOMETER_PIN (1 << PC0)  // Definition of the pin referring to the ADC reading of the potentiometer
 #define BUZZER_PIN (1 << PB2)         // definition of the pin related to the buzzer
 
 /* Declaration of functions */
 void GPIO_init();
 void INTx_init();
+void PCINT_init();
 
 unsigned int adc_result0;
 unsigned int adc_result1;
@@ -79,9 +80,21 @@ ISR(INT1_vect) {
 
 }
 
+// Interrupt routine for changing color to the left
+ISR(PCINT0_vect) {
+  
+}
+
+// Interrupt routine for changing color to the right
+ISR(PCINT2_vect) {
+
+}
+
+// main
 int main() {
-  GPIO_init(); // Starts the GPIO pins
+  GPIO_init(); // Configure the GPIO pins
   INTx_init(); // Configure external interrupts
+  PCINT_init(); // Configure PCINT
 
   //ADC_init();  // Inicializa ADC     
 
@@ -104,10 +117,12 @@ void GPIO_init() {
   DDRD |= RED_COLOR_PIN | GREEN_COLOR_PIN; // 0b01100000
 
   // Declaring pins as input
-  DDRD &= ~(ON_OFFF_BUTTON_PIN | SAVE_BUTTON_PIN | RIGHT_BUTTON_PIN | LEFT_BUTTON_PIN); // 0b10011100
+  DDRB &= ~LEFT_BUTTON_PIN; // 0b00000001
+  DDRD &= ~(ON_OFFF_BUTTON_PIN | SAVE_BUTTON_PIN | RIGHT_BUTTON_PIN); // 0b00011100
 
   // Put the button pins in pull-up
-  PORTD |= ON_OFFF_BUTTON_PIN | SAVE_BUTTON_PIN | RIGHT_BUTTON_PIN | LEFT_BUTTON_PIN; // 0b10011100
+  PORTB |= LEFT_BUTTON_PIN; // 0b00000001
+  PORTD |= ON_OFFF_BUTTON_PIN | SAVE_BUTTON_PIN | RIGHT_BUTTON_PIN; // 0b00011100
 }
 
 // Configure external interrupts
@@ -117,4 +132,14 @@ void INTx_init() {
 
   // Enables the externally configured setting
   EIMSK |= INT0 | INT1; // 0b00000011
+}
+
+// Configure PCINT
+void PCINT_init() {
+  // Enables the PCINT interrupt for PORTB and PORTD
+  PCICR |= PCIE2 | PCIE0; // 0b00000101
+
+  // Enables the PCINT interrupt for pins PCINT23 and PCINT20
+  PCMSK0 |= PCINT0; // 0b00000001
+  PCMSK2 |= PCINT20; // 0b00010000
 }

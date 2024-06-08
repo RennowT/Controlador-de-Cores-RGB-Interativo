@@ -20,7 +20,7 @@ O Controlador de Cores RGB Interativo é um projeto eletrizante que traz o poder
 - PC0 - ADC para mudança de intensidade das cores
 - PD2 - INT0 para o botão de desligar/ligar
 - PD3 - INT1 para o botão de salvar cor do LED RGB
-- PD4 - PCINT20 para o botão de mudança de cor para a direita <-
+- PD4 - PCINT20 para o botão de mudança de cor para a direita ->
 - PD5 - PWM cor vermelha do LED
 - PD6 - PWM cor verde do LED
-- PD7 - PCINT23 para o botão de mudança de cor para a esquerda ->
+- PB0 - PCINT0 para o botão de mudança de cor para a esquerda <-
