@@ -2,10 +2,16 @@
 #include <avr/interrupt.h>
 #include <avr/delay.h>
 
-#define pwmOut (1 << PD6)
-#define RedPin (1 << PD4)
-#define GreenPin (1 << PD5)
-#define BluePin (1 << PD7)
+/* ATMega328 pin definition */
+#define RED_COLOR_PIN (1 << PD5)      // Definition of the pin referring to the red color of the RGB LED
+#define GREEN_COLOR_PIN (1 << PD6)    // Definition of the pin referring to the green color of the RGB LED
+#define BLUE_COLOR_PIN (1 << PB3)     // Definition of the pin referring to the blue color of the RGB LED
+#define ON_OFFF_BUTTON_PIN (1 << PD2) // Definition of the pin for the on and off button
+#define SAVE_BUTTON_PIN (1 << PD3)    // Definition of the pin for the color saving button
+#define RIGHT_BUTTON_PIN (1 << PD4)   // Definition of the pin for the color change button to the right
+#define LEFT_BUTTON_PIN (1 << PD7)    // Definition of the pin for the color change button to the left
+#define POTENCIOMETER_PIN (1 << PC0)  // Definition of the pin referring to the ADC reading of the potentiometer
+#define BUZZER_PIN (1 << PB2)         // definition of the pin related to the buzzer
 
 unsigned int adc_result0;
 unsigned int adc_result1;
@@ -74,16 +80,7 @@ int main() {
   OCR0A = 0;
 
   while (1) {
-    adc_result0 = ADC_read(ADC2D);  // lê o valor do ADC0 = PC0
-    adc_result1 = ADC_read(ADC3D);  // lê o valor do ADC1 = PC1
-    adc_result2 = ADC_read(ADC4D);  // lê o valor do ADC2 = PC2
-    _delay_ms(50);                  // Tempo para troca de canal
-
-    float r = adc_result0 / 4;  // Conversão do valor do ADC para um valor entre 0 e 255
-    float g = adc_result1 / 4;  // Conversão do valor do ADC para um valor entre 0 e 255
-    float b = adc_result2 / 4;  // Conversão do valor do ADC para um valor entre 0 e 255
-
-    setRGB(r, g, b);  // Configura a cor do LED RGB
+    
   }
   return 0;
 }
