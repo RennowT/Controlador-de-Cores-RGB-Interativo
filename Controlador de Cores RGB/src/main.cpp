@@ -15,6 +15,7 @@
 
 /* Declaration of functions */
 void GPIO_init();
+void INTx_init();
 
 unsigned int adc_result0;
 unsigned int adc_result1;
@@ -70,6 +71,7 @@ void setRGB(float r, float g, float b) {
 
 int main() {
   GPIO_init(); // Starts the GPIO pins
+  INTx_init(); // Configure external interrupts
 
   //ADC_init();  // Inicializa ADC     
 
@@ -85,14 +87,23 @@ int main() {
   return 0;
 }
 
+// Starts the GPIO pins
 void GPIO_init() {
   // Declaring pins as output
-  DDRB |= BLUE_COLOR_PIN | BUZZER_PIN;
-  DDRD |= RED_COLOR_PIN | GREEN_COLOR_PIN;
+  DDRB |= BLUE_COLOR_PIN | BUZZER_PIN; // 0b00001100
+  DDRD |= RED_COLOR_PIN | GREEN_COLOR_PIN; // 0b01100000
 
   // Declaring pins as input
-  DDRD &= ~(ON_OFFF_BUTTON_PIN | SAVE_BUTTON_PIN | RIGHT_BUTTON_PIN | LEFT_BUTTON_PIN);
+  DDRD &= ~(ON_OFFF_BUTTON_PIN | SAVE_BUTTON_PIN | RIGHT_BUTTON_PIN | LEFT_BUTTON_PIN); // 0b10011100
 
   // Put the button pins in pull-up
-  PORTD |= ON_OFFF_BUTTON_PIN | SAVE_BUTTON_PIN | RIGHT_BUTTON_PIN | LEFT_BUTTON_PIN;
+  PORTD |= ON_OFFF_BUTTON_PIN | SAVE_BUTTON_PIN | RIGHT_BUTTON_PIN | LEFT_BUTTON_PIN; // 0b10011100
+}
+
+// Configure external interrupts
+void INTx_init() {
+  // Falling edge on INT1 or INT0 generates an interrupt
+  EICRA |= ISC11 | ISC01; // 0b00001010
+
+
 }
