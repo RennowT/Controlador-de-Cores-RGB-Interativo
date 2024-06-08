@@ -69,6 +69,16 @@ void setRGB(float r, float g, float b) {
   //OCR0C = b / 4;  // Blue
 }
 
+// Interrupt routine for the power on/off button
+ISR(INT0_vect) {
+
+}
+
+// Interrupt routine for saving colors to EEPROM
+ISR(INT1_vect) {
+
+}
+
 int main() {
   GPIO_init(); // Starts the GPIO pins
   INTx_init(); // Configure external interrupts
@@ -79,7 +89,7 @@ int main() {
   //TCCR0B |= (1 << CS00);
   //OCR0A = 0;
 
-  
+  sei();
 
   while (1) {
     
@@ -105,5 +115,6 @@ void INTx_init() {
   // Falling edge on INT1 or INT0 generates an interrupt
   EICRA |= ISC11 | ISC01; // 0b00001010
 
-
+  // Enables the externally configured setting
+  EIMSK |= INT0 | INT1; // 0b00000011
 }
