@@ -17,6 +17,7 @@
 void GPIO_init();
 void INTx_init();
 void PCINT_init();
+void PWM_init();
 
 unsigned int adc_result0;
 unsigned int adc_result1;
@@ -82,7 +83,7 @@ ISR(INT1_vect) {
 
 // Interrupt routine for changing color to the left
 ISR(PCINT0_vect) {
-  
+
 }
 
 // Interrupt routine for changing color to the right
@@ -92,9 +93,10 @@ ISR(PCINT2_vect) {
 
 // main
 int main() {
-  GPIO_init(); // Configure the GPIO pins
-  INTx_init(); // Configure external interrupts
+  GPIO_init();  // Configure the GPIO pins
+  INTx_init();  // Configure external interrupts
   PCINT_init(); // Configure PCINT
+  PWM_init();   // Configures timers for PWM
 
   //ADC_init();  // Inicializa ADC     
 
@@ -128,18 +130,29 @@ void GPIO_init() {
 // Configure external interrupts
 void INTx_init() {
   // Falling edge on INT1 or INT0 generates an interrupt
-  EICRA |= ISC11 | ISC01; // 0b00001010
+  EICRA |= (1 << ISC11) | (1 << ISC01); // 0b00001010
 
   // Enables the externally configured setting
-  EIMSK |= INT0 | INT1; // 0b00000011
+  EIMSK |= (1 << INT0) | (1 << INT1); // 0b00000011
 }
 
 // Configure PCINT
 void PCINT_init() {
   // Enables the PCINT interrupt for PORTB and PORTD
-  PCICR |= PCIE2 | PCIE0; // 0b00000101
+  PCICR |= (1 << PCIE2) | (1 << PCIE0); // 0b00000101
 
   // Enables the PCINT interrupt for pins PCINT23 and PCINT20
-  PCMSK0 |= PCINT0; // 0b00000001
-  PCMSK2 |= PCINT20; // 0b00010000
+  PCMSK0 |= (1 << PCINT0); // 0b00000001
+  PCMSK2 |= (1 << PCINT20); // 0b00010000
+}
+
+// Configures timers for PWM
+void PWM_init() {
+  // Configure Timer 0 for Compare Match Output A and B Mode
+  TCCR0A |= (1 << COM0A1) | (1 << COM0B1) | (1 << WGM01) | (1 << WGM00); // Compare Output Mode, Fast PWM Mode (0b11000011)
+  TCCR0B |= (1 << CS00); // No prescaling (0b00000001)
+
+  // Configure Timer 2 for Compare Match Output A Mode
+  TCCR2A |= (1 << COM2A1) | (1 << WGM21) | (1 << WGM20); // Compare Output Mode, Fast PWM Mode (ob10000011)
+  TCCR2B |= (1 << CS20); // No prescaling (0b00000001)
 }
