@@ -18,25 +18,13 @@ void GPIO_init();
 void INTx_init();
 void PCINT_init();
 void PWM_init();
+void ADC_init();
 
 unsigned int adc_result0;
 unsigned int adc_result1;
 unsigned int adc_result2;
 
 float tensao;
-
-void ADC_init(void) {
-  // Configurando Vref para VCC = 5V
-  ADMUX = (1 << REFS0);
-  /*
-    ADC ativado e preescaler de 128
-    16MHz / 128 = 125kHz
-    ADEN = ADC Enable, ativa o ADC
-    ADPSx = ADC Prescaler Select Bits
-    1 1 1 = clock / 128
-  */
-  ADCSRA = (1 << ADEN) | (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0);
-}
 
 int ADC_read(uint8_t ch) {
   char i;
@@ -97,14 +85,8 @@ int main() {
   INTx_init();  // Configure external interrupts
   PCINT_init(); // Configure PCINT
   PWM_init();   // Configures timers for PWM
-
-  //ADC_init();  // Inicializa ADC     
-
-  //TCCR0A |= (1 << WGM01) | (1 << WGM00) | (1 << COM0A1);
-  //TCCR0B |= (1 << CS00);
-  //OCR0A = 0;
-
-  sei();
+  ADC_init();   // Configure the ADCs pins    
+  sei();        // Enable global interrupt
 
   while (1) {
     
@@ -149,10 +131,18 @@ void PCINT_init() {
 // Configures timers for PWM
 void PWM_init() {
   // Configure Timer 0 for Compare Match Output A and B Mode
-  TCCR0A |= (1 << COM0A1) | (1 << COM0B1) | (1 << WGM01) | (1 << WGM00); // Compare Output Mode, Fast PWM Mode (0b11000011)
+  TCCR0A |= (1 << COM0A1) | (1 << COM0B1) | (1 << WGM01) | (1 << WGM00); // Compare Output Mode and Fast PWM Mode (0b11000011)
   TCCR0B |= (1 << CS00); // No prescaling (0b00000001)
 
   // Configure Timer 2 for Compare Match Output A Mode
-  TCCR2A |= (1 << COM2A1) | (1 << WGM21) | (1 << WGM20); // Compare Output Mode, Fast PWM Mode (ob10000011)
+  TCCR2A |= (1 << COM2A1) | (1 << WGM21) | (1 << WGM20); // Compare Output Mode and Fast PWM Mode (ob10000011)
   TCCR2B |= (1 << CS20); // No prescaling (0b00000001)
+}
+
+// Configure the ADCs pins
+void ADC_init(void) {
+  // Configuring Vref for VCC = 5V
+  ADMUX = (1 << REFS0); 
+  // Enables the ADC and configures the 128 prescaler
+  ADCSRA = (1 << ADEN) | (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0); 
 }
