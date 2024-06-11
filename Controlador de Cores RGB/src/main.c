@@ -3,15 +3,18 @@
 #include <avr/delay.h>
 
 /* ATMega328 pin definition */
-#define RED_COLOR_PIN (1 << PD5)      // Definition of the pin referring to the red color of the RGB LED
-#define GREEN_COLOR_PIN (1 << PD6)    // Definition of the pin referring to the green color of the RGB LED
-#define BLUE_COLOR_PIN (1 << PB3)     // Definition of the pin referring to the blue color of the RGB LED
-#define ON_OFFF_BUTTON_PIN (1 << PD2) // Definition of the pin for the on and off button
-#define SAVE_BUTTON_PIN (1 << PD3)    // Definition of the pin for the color saving button
-#define RIGHT_BUTTON_PIN (1 << PD4)   // Definition of the pin for the color change button to the right
-#define LEFT_BUTTON_PIN (1 << PB0)    // Definition of the pin for the color change button to the left
-#define POTENCIOMETER_PIN (1 << PC0)  // Definition of the pin referring to the ADC reading of the potentiometer
-#define BUZZER_PIN (1 << PB2)         // definition of the pin related to the buzzer
+#define RED_COLOR_PIN (1 << PD6)         // Definition of the pin referring to the red color of the RGB LED
+#define GREEN_COLOR_PIN (1 << PD5)       // Definition of the pin referring to the green color of the RGB LED
+#define BLUE_COLOR_PIN (1 << PB3)        // Definition of the pin referring to the blue color of the RGB LED
+#define ON_OFFF_BUTTON_PIN (1 << PD2)    // Definition of the pin for the on and off button
+#define SAVE_BUTTON_PIN (1 << PD3)       // Definition of the pin for the color saving button
+#define RIGHT_BUTTON_PIN (1 << PD4)      // Definition of the pin for the color change button to the right
+#define LEFT_BUTTON_PIN (1 << PB0)       // Definition of the pin for the color change button to the left
+#define BUZZER_PIN (1 << PB2)            // definition of the pin related to the buzzer
+#define POTENCIOMETER_ADC_CHANNEL ADC0D  // Definition of the ADC referring to the potentiometer pin
+
+/* Samples */
+#define SAMPLE_ADC_READ 8
 
 /* Declaration of functions */
 void GPIO_init();
@@ -19,49 +22,15 @@ void INTx_init();
 void PCINT_init();
 void PWM_init();
 void ADC_init();
+int ADC_read(uint8_t ch);
 
 unsigned int adc_result0;
-unsigned int adc_result1;
-unsigned int adc_result2;
 
 float tensao;
 
-int ADC_read(uint8_t ch) {
-  char i;
-  int ADC_temp = 0;  // ADC temporário, para manipular leitura
-  int ADC_read = 0;  // ADC_read
-  ch &= 0x07;        // 0b00000111
-  // Zerar os 3 primeiros bits e manter o resto
-  ADMUX = (ADMUX & 0xF8) | ch;  // 0b11111000
-  // ADSC (ADC Start Conversion)
-  ADCSRA |= (1 << ADSC);  // Faça uma conversão
-  // ADIF (ADC Interrupt Flag) é setada quando o ADC pede interrupção
-  // e resetada quando o vetor de interrupção
-  // é tratado.
-  while (!(ADCSRA & (1 << ADIF)))
-    ;                      // Aguarde a conversão do sinal
-  for (i = 0; i < 8; i++)  // Fazendo a conversão 8 vezes para maior precisão
-  {
-    ADCSRA |= (1 << ADSC);  // Faça uma conversão
-    while (!(ADCSRA & (1 << ADIF)))
-      ;                       // Aguarde a conversão do sinal
-    ADC_temp = ADCL;          // lê o registro ADCL
-    ADC_temp += (ADCH << 8);  // lê o registro ADCH
-    ADC_read += ADC_temp;     // Acumula o resultado (8 amostras) para média
-  }
-  ADC_read = ADC_read >> 3;  // média das 8 amostras ( >> 3 é o mesmo que /8)
-  return ADC_read;
-}
-
-void setRGB(float r, float g, float b) {
-  OCR0A = r / 4;  // Red
-  OCR0B = g / 4;  // Green
-  //OCR0C = b / 4;  // Blue
-}
-
 // Interrupt routine for the power on/off button
 ISR(INT0_vect) {
-
+  
 }
 
 // Interrupt routine for saving colors to EEPROM
@@ -87,7 +56,7 @@ int main() {
   PWM_init();   // Configures timers for PWM
   ADC_init();   // Configure the ADCs pins    
   sei();        // Enable global interrupt
-
+ 
   while (1) {
     
   }
@@ -145,4 +114,28 @@ void ADC_init(void) {
   ADMUX = (1 << REFS0); 
   // Enables the ADC and configures the 128 prescaler
   ADCSRA = (1 << ADEN) | (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0); 
+}
+
+
+// Reads the ADC channel value
+int ADC_read(uint8_t ch) {
+  char i;
+  int ADC_temp = 0;  // Temporary ADC to handle read
+  int ADC_read = 0;  // ADC_read
+  ch &= 0x07;        // 0b00000111
+
+  ADMUX = (ADMUX & 0xF8) | ch;     // Select the input channel
+  ADCSRA |= (1 << ADSC);           // Make a conversion
+  while (!(ADCSRA & (1 << ADIF))); // Wait for the signal to convert
+
+  for (i = 0; i < SAMPLE_ADC_READ; i++) {  // Doing the conversion a few times for greater accuracy
+    ADCSRA |= (1 << ADSC);                 // Make a conversion
+    while (!(ADCSRA & (1 << ADIF)));       // Wait for the signal to convert
+    ADC_temp = ADCL;                       // reads the ADCL register
+    ADC_temp += (ADCH << 8);               // reads the ADCH register
+    ADC_read += ADC_temp;                  // Accumulate the result to average
+  }
+
+  ADC_read = ADC_read / SAMPLE_ADC_READ; // Calculates the average
+  return ADC_read;
 }
